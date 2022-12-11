@@ -16,8 +16,8 @@
     "contributes": {
         "commands": [
             {
-                "command": "klap.update",
-                "title": "Update klap"
+                "command": "klap.initMetadata",
+                "title": "Initialize klap metadata"
             }
         ]
     },

@@ -1,32 +1,32 @@
 import { createReadStream } from "fs";
-import { KlapNoteMetadata, NoteMetadataParseResult } from "./types";
+import { KlapFileMetadata, KlapFileMetadataParseResult } from "./types";
 import { createInterface } from "readline";
 
-const KLAP_METADATA_REGEX = /^.{0,10}klap.*(\{.*\})/;
+const DEFAULT_KLAP_METADATA_REGEX = /^.{0,10}klap.*(\{.*\})/;
 
 function hasOwnProperty<X extends {}, Y extends PropertyKey>(obj: X, prop: Y): obj is X & Record<Y, unknown> {
     return obj.hasOwnProperty(prop);
 }
 
-function validateMetadata(object: unknown): KlapNoteMetadata {
+function validateMetadata(object: unknown): KlapFileMetadata {
     if (!(object instanceof Object)) {
-        throw new Error("metadata is not an object");
+        throw new Error("Klap metadata is not a JSON object");
     }
 
     if (!hasOwnProperty(object, "uuid") || typeof object["uuid"] !== "string") {
-        throw new Error("uuid should exist");
+        throw new Error("value for 'uuid' must be specified");
     }
 
     if (!hasOwnProperty(object, "created") || typeof object["created"] !== "string") {
-        throw new Error("created should exist");
+        throw new Error("value for 'created' must be specified");
     }
 
     if (!hasOwnProperty(object, "lastModified") || typeof object["lastModified"] !== "string") {
-        throw new Error("lastModified should exist");
+        throw new Error("value for 'lastModified' must be specified");
     }
 
     if (!hasOwnProperty(object, "tags") || !(object["tags"] instanceof Array)) {
-        throw new Error("tags array should exist");
+        throw new Error("value for 'tags' must be specified");
     }
 
     return {
@@ -38,8 +38,8 @@ function validateMetadata(object: unknown): KlapNoteMetadata {
     };
 }
 
-function parseLine(line: string): NoteMetadataParseResult {
-    const matches = line.match(KLAP_METADATA_REGEX);
+function parseLine(line: string, customMetadataRegex?: RegExp): KlapFileMetadataParseResult {
+    const matches = line.match(customMetadataRegex ?? DEFAULT_KLAP_METADATA_REGEX);
     if (!matches?.length) {
         return undefined;
     }
@@ -54,16 +54,16 @@ function parseLine(line: string): NoteMetadataParseResult {
     } catch (e) {
         return {
             type: "error",
-            errorMsg: `${e}`,
+            errorMsg: `[Error parsing klap metadata] ${e}`,
         };
     }
 }
 
-export function parseMetadata(content: string): NoteMetadataParseResult {
+function parseMetadata(content: string, customMetadataRegex?: RegExp): KlapFileMetadataParseResult {
     const lines = content.split("\n");
     for (let line of lines) {
         console.log(line);
-        const parseResult = parseLine(line);
+        const parseResult = parseLine(line, customMetadataRegex);
         if (parseResult?.type !== undefined) {
             return parseResult;
         }
@@ -71,7 +71,10 @@ export function parseMetadata(content: string): NoteMetadataParseResult {
     return undefined;
 }
 
-export async function getMetadataForPath(filePath: string): Promise<NoteMetadataParseResult> {
+async function readKlapMetadataFromFile(
+    filePath: string,
+    customMetadataRegex?: RegExp
+): Promise<KlapFileMetadataParseResult> {
     try {
         const rl = createInterface({
             input: createReadStream(filePath),
@@ -79,12 +82,14 @@ export async function getMetadataForPath(filePath: string): Promise<NoteMetadata
         });
 
         for await (const line of rl) {
-            const parseResult = parseLine(line);
+            const parseResult = parseLine(line, customMetadataRegex);
             if (parseResult?.type !== undefined) {
                 return parseResult;
             }
         }
-    } catch (err) {
-        console.error(err);
+    } catch (e) {
+        console.error(`[Error reading klap metadata] ${e}`);
     }
 }
+
+export { readKlapMetadataFromFile as getMetadataForPath, parseMetadata };
