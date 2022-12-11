@@ -7,8 +7,7 @@ export type KlapNoteMetadata = {
 };
 
 export type FileContext = {
-    metadataPrefix: string;
-    fullMetadataMatch: string;
+    metadataObjectString: string;
 };
 
 export type KlapMetadataError = {

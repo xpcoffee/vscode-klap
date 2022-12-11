@@ -30,6 +30,10 @@ export function klap({ filePath, action, onStop, onUpdate }: KlapParams) {
 
         const metadataChanges = action?.(originalMetadata);
         const updatedMetadata = buildNotesMetadata({ originalMetadata, metadataChanges });
-        updatedMetadata && onUpdate?.({ originalMetadata, updatedMetadata });
+        updatedMetadata &&
+            onUpdate?.({
+                originalMetadata,
+                updatedMetadata,
+            });
     });
 }

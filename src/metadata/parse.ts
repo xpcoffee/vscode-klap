@@ -1,9 +1,8 @@
-import { createReadStream, readFileSync } from "fs";
+import { createReadStream } from "fs";
 import { KlapNoteMetadata, NoteMetadataParseResult } from "./types";
 import { createInterface } from "readline";
-import { once } from "events";
 
-const KLAP_METADATA_REGEX = /^(.{0,10}klap.*)(\{.*\})/;
+const KLAP_METADATA_REGEX = /^.{0,10}klap.*(\{.*\})/;
 
 function hasOwnProperty<X extends {}, Y extends PropertyKey>(obj: X, prop: Y): obj is X & Record<Y, unknown> {
     return obj.hasOwnProperty(prop);
@@ -46,12 +45,11 @@ function parseLine(line: string): NoteMetadataParseResult {
     }
 
     try {
-        const [fullMatch, prefix, metadataObjectStr] = matches;
+        const [_fullMatch, metadataObjectStr] = matches;
         const metadataObject = JSON.parse(metadataObjectStr);
         return {
             ...validateMetadata(metadataObject),
-            metadataPrefix: prefix,
-            fullMetadataMatch: fullMatch,
+            metadataObjectString: metadataObjectStr,
         };
     } catch (e) {
         return {

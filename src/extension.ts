@@ -1,17 +1,18 @@
+import { readFileSync, writeFileSync } from "fs";
 import * as vscode from "vscode";
 import { getMetadataString } from "./metadata/generate";
 import { KlapNoteMetadata } from "./metadata/types";
 import { klap } from "./toolkit";
 
 export function activate(context: vscode.ExtensionContext) {
-    let klapUpdateDisposable = vscode.commands.registerCommand("klap.update", klapUpdate);
+    let klapUpdateDisposable = vscode.commands.registerCommand("klap.update", klapUpdateWithEditor);
     context.subscriptions.push(klapUpdateDisposable);
 
-    const onDidSaveDisposable = vscode.workspace.onDidSaveTextDocument(klapUpdate);
+    const onDidSaveDisposable = vscode.workspace.onDidSaveTextDocument(klapUpdateWithoutEditor);
     context.subscriptions.push(onDidSaveDisposable);
 }
 
-function klapUpdate(document?: vscode.TextDocument) {
+function klapUpdateWithEditor() {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         return;
@@ -19,16 +20,36 @@ function klapUpdate(document?: vscode.TextDocument) {
 
     // only update current open file
     const filePath = editor.document.uri.fsPath;
-    if (document && filePath !== document.uri.fsPath) {
-        console.log({ filePath, docFilePath: document.uri.fsPath });
-        return;
-    }
 
     klap({
         filePath,
         onUpdate: ({ originalMetadata, updatedMetadata }) => {
             if (originalMetadata === undefined && editor) {
                 insertNewMetadata(editor, updatedMetadata);
+            }
+        },
+        onStop: console.log,
+    });
+}
+
+function klapUpdateWithoutEditor(document?: vscode.TextDocument) {
+    const filePath = document?.uri.fsPath;
+    console.log({ filePath, document });
+
+    if (!filePath) {
+        return;
+    }
+
+    klap({
+        filePath,
+        onUpdate: ({ originalMetadata, updatedMetadata }) => {
+            console.log("updating");
+            if (originalMetadata !== undefined) {
+                updateExistingMetadata({
+                    path: filePath,
+                    originalMetadataObjectString: originalMetadata.metadataObjectString,
+                    updatedMetadata,
+                });
             }
         },
         onStop: console.log,
@@ -42,6 +63,21 @@ function insertNewMetadata(editor: vscode.TextEditor, metadata: KlapNoteMetadata
             builder.insert(editor.selection.active, `${metadataString}`);
         });
     });
+}
+
+function updateExistingMetadata({
+    path,
+    originalMetadataObjectString,
+    updatedMetadata,
+}: {
+    path: string;
+    originalMetadataObjectString: string;
+    updatedMetadata: KlapNoteMetadata;
+}) {
+    const updatedMetadataString = getMetadataString({ metadata: updatedMetadata, objectOnly: true });
+    const fileContents = readFileSync(path, "utf-8");
+    const newContents = fileContents.replace(originalMetadataObjectString, updatedMetadataString);
+    writeFileSync(path, newContents);
 }
 
 function withNewCommentOnFirstLine(editor: vscode.TextEditor, callback: () => void) {

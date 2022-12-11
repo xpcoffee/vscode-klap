@@ -8,19 +8,22 @@ type GenerateMetadataParams = {
 
 export function buildNotesMetadata({ originalMetadata, metadataChanges }: GenerateMetadataParams): KlapNoteMetadata {
     const now = new Date(Date.now());
+    console.log({ metadataChanges });
     return {
         type: "metadata",
-        uuid: originalMetadata?.uuid || randomUUID(),
+        uuid: metadataChanges?.uuid || originalMetadata?.uuid || randomUUID(),
         lastModified: now,
-        created: originalMetadata?.created || now,
-        tags: metadataChanges?.tags || [],
+        created: metadataChanges?.created || originalMetadata?.created || now,
+        tags: metadataChanges?.tags || originalMetadata?.tags || [],
     };
 }
 
-export function getMetadataString({ metadata, prefix }: { metadata: KlapNoteMetadata; prefix?: string }): string {
-    if (prefix && !prefix.includes("klap")) {
-        throw new Error("klap metadata prefix must contain 'klap'");
-    }
-
-    return `${prefix || "klap "}${JSON.stringify(metadata)}`;
+export function getMetadataString({
+    metadata,
+    objectOnly,
+}: {
+    metadata: KlapNoteMetadata;
+    objectOnly?: boolean;
+}): string {
+    return `${objectOnly ? "" : "klap "}${JSON.stringify(metadata)}`;
 }
