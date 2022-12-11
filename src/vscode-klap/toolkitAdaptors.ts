@@ -1,3 +1,7 @@
+/**
+ * Adapts functionality from the klap toolkit so it can be more-easily used in vscode.
+ */
+
 import * as vscode from "vscode";
 import { klap, updateExistingMetadata as toolkitUpdateExistingMetadata } from "../klap/toolkit";
 

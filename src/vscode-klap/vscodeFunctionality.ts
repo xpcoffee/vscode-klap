@@ -1,3 +1,7 @@
+/**
+ * Contains klap functionality that is specific to vscode.
+ */
+
 import * as vscode from "vscode";
 import { getMetadataString } from "../klap/core/metadata";
 import { klap } from "../klap/toolkit";

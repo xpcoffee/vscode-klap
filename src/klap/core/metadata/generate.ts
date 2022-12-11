@@ -15,7 +15,6 @@ function buildNotesMetadata({
     customPrefix,
 }: GenerateMetadataParams): KlapFileMetadata & KlapFileContext {
     const now = new Date(Date.now());
-    console.log({ metadataChanges });
     const metadata: KlapFileMetadata = {
         type: "metadata",
         uuid: metadataChanges?.uuid || originalMetadata?.uuid || randomUUID(),

@@ -1,7 +1,7 @@
 {
-    "name": "klap",
-    "displayName": "klap",
-    "description": "",
+    "name": "vscode-klap",
+    "displayName": "vscode-klap",
+    "description": "[DO NOT USE] VSCode integration for klap (currently contains core klap too).",
     "version": "0.0.1",
     "engines": {
         "vscode": "^1.74.0"
@@ -17,7 +17,7 @@
         "commands": [
             {
                 "command": "klap.initMetadata",
-                "title": "Initialize klap metadata"
+                "title": "[klap] Initialize metadata"
             }
         ]
     },

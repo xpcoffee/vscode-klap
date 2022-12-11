@@ -1,3 +1,7 @@
+/**
+ * Defines the actions of the extension and registers it with the editor.
+ */
+
 import * as vscode from "vscode";
 import { updateExistingMetadata, initKlapMetadata } from "./vscode-klap";
 
@@ -9,6 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const onDidSaveDisposable = vscode.workspace.onDidSaveTextDocument(updateExistingMetadata);
     context.subscriptions.push(onDidSaveDisposable);
+    console.log("should be activated...");
 }
 
 // This method is called when your extension is deactivated

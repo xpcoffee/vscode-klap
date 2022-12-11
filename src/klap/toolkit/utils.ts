@@ -2,7 +2,6 @@ import { readFileSync, writeFileSync } from "fs";
 import { KlapOnUpdate } from "./types";
 
 const updateExistingMetadata: KlapOnUpdate = ({ filePath, originalMetadata, updatedMetadata }) => {
-    console.log("updating");
     if (originalMetadata !== undefined) {
         replaceTextInFile({
             path: filePath,

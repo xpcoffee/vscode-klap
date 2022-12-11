@@ -1,3 +1,7 @@
+/**
+ * Non-klap functionality for working in vs-code; potentially extract this into a separate project if it grows enough.
+ */
+
 import * as vscode from "vscode";
 
 async function asNewCommentOnFirstLine(content: string, editor: vscode.TextEditor) {

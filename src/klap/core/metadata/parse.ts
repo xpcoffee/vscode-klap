@@ -62,7 +62,6 @@ function parseLine(line: string, customMetadataRegex?: RegExp): KlapFileMetadata
 function parseMetadata(content: string, customMetadataRegex?: RegExp): KlapFileMetadataParseResult {
     const lines = content.split("\n");
     for (let line of lines) {
-        console.log(line);
         const parseResult = parseLine(line, customMetadataRegex);
         if (parseResult?.type !== undefined) {
             return parseResult;
